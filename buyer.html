@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>購買查詢 🎀</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff5f8;--surface:#ffffff;--border:#fcd6e4;
+  --accent:#f472a8;--accent2:#fc9cc4;--soft:#fde8f1;
+  --text:#3d2030;--dim:#b07090;--green:#5bbf8e;--green-soft:#e6f9f1;
+  --green-border:#a8e6cc;--yellow:#f5a623;--yellow-soft:#fff8e6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito','Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;top:-120px;right:-120px;width:400px;height:400px;background:radial-gradient(circle,#fcd6e4 0%,transparent 70%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-100px;left:-100px;width:360px;height:360px;background:radial-gradient(circle,#fce4f3 0%,transparent 70%);pointer-events:none;z-index:0}
+
+.wrap{max-width:540px;margin:0 auto;padding:28px 16px 60px;position:relative;z-index:1}
+
+.hero{text-align:center;padding:28px 0 22px}
+.badge{display:inline-block;background:var(--soft);color:var(--accent);font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:12px;letter-spacing:.5px}
+.hero h1{font-size:26px;font-weight:800;margin-bottom:6px;line-height:1.3}
+.hero p{font-size:13px;color:var(--dim);line-height:1.6}
+
+.card{background:var(--surface);border:2px solid var(--border);border-radius:22px;padding:20px;margin-bottom:14px;box-shadow:0 4px 20px rgba(244,114,168,.07)}
+
+label.field-label{display:block;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:.3px}
+
+input[type=text],input[type=number]{width:100%;background:var(--soft);border:2px solid var(--border);border-radius:14px;padding:12px 16px;font-size:15px;color:var(--text);font-family:inherit;font-weight:600;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,114,168,.15)}
+input::placeholder{color:var(--dim);font-weight:400}
+
+.btn-main{display:block;width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:16px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;box-shadow:0 4px 16px rgba(244,114,168,.3);margin-top:4px}
+.btn-main:hover{opacity:.88}
+.btn-main:active{transform:scale(.97)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+
+/* SEARCH */
+.search-row{display:flex;gap:10px}
+.search-row input{flex:1}
+.btn-search{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:14px;padding:12px 20px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity .15s,transform .1s;box-shadow:0 4px 14px rgba(244,114,168,.3)}
+.btn-search:hover{opacity:.88}
+.btn-search:active{transform:scale(.97)}
+
+/* ITEMS */
+.result-name{font-size:19px;font-weight:800;margin-bottom:3px}
+.result-meta{font-size:13px;color:var(--dim)}
+.check-progress{font-size:12px;color:var(--dim);text-align:right;margin:8px 0 10px;font-weight:600}
+
+.item-card{background:var(--surface);border:2px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:10px;display:flex;align-items:stretch;transition:border-color .2s,box-shadow .2s}
+.item-card.checked{border-color:var(--green);box-shadow:0 2px 12px rgba(91,191,142,.15)}
+.item-img{width:90px;flex-shrink:0;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:26px}
+.item-img img{width:90px;height:100%;min-height:90px;object-fit:cover;display:block}
+.item-body{padding:12px 12px 12px 14px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.item-name{font-size:14px;font-weight:700;line-height:1.3}
+.item-desc{font-size:11px;color:var(--dim)}
+.item-price{font-size:16px;font-weight:800;color:var(--accent);margin-top:3px}
+.item-check-wrap{display:flex;align-items:center;padding:0 14px;flex-shrink:0}
+.check-box{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--border);background:var(--soft);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:13px;flex-shrink:0;user-select:none;color:transparent}
+.check-box.on{background:var(--green);border-color:var(--green);color:#fff}
+
+/* TOTAL */
+.total-bar{background:var(--soft);border:2px solid var(--border);border-radius:18px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.total-label{font-size:13px;color:var(--dim);font-weight:600}
+.total-amt{font-size:21px;font-weight:800;color:var(--accent)}
+
+/* PAYMENT SECTION */
+.section-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pay-opt{border:2px solid var(--border);border-radius:16px;padding:14px 12px;text-align:center;cursor:pointer;transition:all .2s;background:var(--soft)}
+.pay-opt:hover{border-color:var(--accent2)}
+.pay-opt.sel{border-color:var(--accent);background:var(--surface);box-shadow:0 2px 12px rgba(244,114,168,.15)}
+.pay-opt .po-icon{font-size:24px;margin-bottom:6px}
+.pay-opt .po-name{font-size:13px;font-weight:700;color:var(--text)}
+.pay-opt .po-desc{font-size:11px;color:var(--dim);margin-top:2px}
+
+.pay-form{display:none;margin-top:4px}
+.pay-form.show{display:block}
+
+/* BANK INFO */
+.bank-info{background:var(--yellow-soft);border:2px solid #f5d88a;border-radius:16px;padding:16px 18px;margin-bottom:14px}
+.bank-info-title{font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:10px;letter-spacing:.3px}
+.bank-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5e5b0}
+.bank-row:last-child{border-bottom:none}
+.bank-key{font-size:12px;color:#a07830;font-weight:600}
+.bank-val{font-size:14px;font-weight:800;color:#6b4f10;font-family:monospace;letter-spacing:.5px}
+.copy-btn{font-size:11px;background:#f5d88a;border:none;border-radius:8px;padding:3px 8px;cursor:pointer;font-weight:700;color:#6b4f10;font-family:inherit}
+.copy-btn:hover{background:#f0c84a}
+
+/* IMG UPLOAD */
+.img-upload-area{width:100%;height:110px;background:var(--soft);border:2px dashed var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;color:var(--dim);font-size:13px;gap:5px;transition:border-color .2s;font-weight:600}
+.img-upload-area:hover{border-color:var(--accent)}
+.img-upload-area img{width:100%;height:100%;object-fit:cover}
+.clear-img-btn{width:100%;margin-top:6px;background:transparent;border:1.5px solid var(--border);border-radius:12px;padding:7px;font-size:12px;font-weight:700;color:var(--dim);cursor:pointer;font-family:inherit;display:none}
+.clear-img-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* CONFIRM BANNER */
+.confirm-ok{background:var(--green-soft);border:2px solid var(--green-border);border-radius:18px;padding:20px;margin-top:6px;text-align:center;display:none}
+.confirm-ok.show{display:block}
+.confirm-ok .ok-icon{font-size:36px;margin-bottom:8px}
+.confirm-ok h3{font-size:16px;font-weight:800;color:#2d7a5a;margin-bottom:4px}
+.confirm-ok p{font-size:13px;color:#4a9e72}
+
+.not-found{text-align:center;padding:44px 0}
+.not-found .ico{font-size:50px;margin-bottom:12px}
+.not-found h3{font-size:18px;font-weight:800;margin-bottom:6px}
+.not-found p{font-size:13px;color:var(--dim);line-height:1.7}
+.loading{text-align:center;padding:32px 0;color:var(--dim);font-size:14px;font-weight:600}
+
+.field-gap{margin-bottom:12px}
+
+.footer{text-align:center;margin-top:36px;font-size:12px;color:var(--dim)}
+
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:up .22s ease forwards}
+
+.step-divider{display:flex;align-items:center;gap:10px;margin:16px 0 14px}
+.step-divider .line{flex:1;height:1.5px;background:var(--border)}
+.step-divider span{font-size:12px;font-weight:700;color:var(--dim);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="badge">🎀 購買確認系統</div>
+    <h1>查詢購買清單</h1>
+    <p>輸入名字查詢，確認商品後完成付款登記 ✨</p>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="card">
+    <label class="field-label">👤 你的名字</label>
+    <div class="search-row">
+      <input type="text" id="buyerInput" placeholder="輸入名字…" onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="btn-search" onclick="doSearch()">查詢 🔍</button>
+    </div>
+  </div>
+
+  <div id="result"></div>
+  <div class="footer">如有任何問題請聯繫賣家 💌</div>
+</div>
+
+<script>
+const DB_URL = 'https://my-shop-316d7-default-rtdb.asia-southeast1.firebasedatabase.app';
+let checkedItems = {};
+let totalItems = 0;
+let payImgB64 = '';
+let currentBuyer = '';
+let currentTotal = 0;
+
+async function doSearch() {
+  const name = document.getElementById('buyerInput').value.trim();
+  const el = document.getElementById('result');
+  if (!name) return;
+  el.innerHTML = '<div class="loading">🔍 查詢中…</div>';
+  checkedItems = {}; payImgB64 = ''; currentBuyer = '';
+
+  try {
+    const res = await fetch(`${DB_URL}/entries.json`);
+    const data = await res.json();
+    if (!data) { showNotFound(name, el); return; }
+    const allEntries = Object.values(data);
+    const key = [...new Set(allEntries.map(e => e.buyer))]
+      .find(k => k === name || k.toLowerCase() === name.toLowerCase());
+    if (!key) { showNotFound(name, el); return; }
+
+    const items = allEntries.filter(e => e.buyer === key);
+    currentTotal = items.reduce((s, e) => s + Number(e.price), 0);
+    currentBuyer = key;
+    totalItems = items.length;
+
+    // load bank info + payments
+    const [bRes, pRes] = await Promise.all([
+      fetch(`${DB_URL}/bankInfo.json`),
+      fetch(`${DB_URL}/payments.json`)
+    ]);
+    const bankInfo = await bRes.json() || {};
+    const pData = await pRes.json() || {};
+    const allPayments = pData ? Object.values(pData).filter(p => p.buyer === key) : [];
+    const confirmedPayments = allPayments.filter(p => p.status === '已確認');
+    const pendingPayments = allPayments.filter(p => p.status === '待處理');
+    const totalPaid = confirmedPayments.reduce((s, p) => s + Number(p.amount), 0);
+
+    // If already has any payment record, show status banner first
+    let payStatusHtml = '';
+    if (confirmedPayments.length > 0) {
+      payStatusHtml = `<div style="background:#e6f9f1;border:2px solid #a8e6cc;border-radius:20px;padding:18px 20px;margin-bottom:14px;text-align:center;" class="anim">
+        <div style="font-size:32px;margin-bottom:8px">✅</div>
+        <div style="font-size:16px;font-weight:800;color:#2d7a5a;margin-bottom:4px">付款已查收！</div>
+        <div style="font-size:13px;color:#4a9e72">已確認金額：NT$ ${totalPaid.toLocaleString()}</div>
+        ${totalPaid < currentTotal ? `<div style="font-size:12px;color:#b07090;margin-top:6px">尚有 NT$ ${(currentTotal - totalPaid).toLocaleString()} 未確認</div>` : ''}
+      </div>`;
+    } else if (pendingPayments.length > 0) {
+      payStatusHtml = `<div style="background:#fff8e6;border:2px solid #f5d88a;border-radius:20px;padding:18px 20px;margin-bottom:14px;text-align:center;" class="anim">
+        <div style="font-size:32px;margin-bottom:8px">⏳</div>
+        <div style="font-size:16px;font-weight:800;color:#a07830;margin-bottom:4px">金額審核中</div>
+        <div style="font-size:13px;color:#c09040">已提交付款記錄，請耐心等候賣家確認 💌</div>
+      </div>`;
+    }
+
+    let html = `${payStatusHtml}<div class="card anim">
+      <div class="result-name">🛍️ ${esc(key)} 的購買清單</div>
+      <div class="result-meta">共 ${items.length} 件商品・總計 NT$ ${currentTotal.toLocaleString()}</div>
+    </div>
+    <div class="check-progress" id="checkProgress">請逐一確認商品 ▼　已確認 0 / ${items.length} 件</div>`;
+
+    items.forEach((e, i) => {
+      html += `<div class="item-card anim" id="card-${i}" style="animation-delay:${i*.05}s">
+        <div class="item-img">${e.img ? `<img src="${e.img}">` : '🎮'}</div>
+        <div class="item-body">
+          <div class="item-name">${esc(e.name)}</div>
+          ${e.desc ? `<div class="item-desc">${esc(e.desc)}</div>` : ''}
+          <div class="item-price">NT$ ${Number(e.price).toLocaleString()}</div>
+        </div>
+        <div class="item-check-wrap">
+          <div class="check-box" id="chk-${i}" onclick="toggleCheck(${i})">✓</div>
+        </div>
+      </div>`;
+    });
+
+    html += `<div class="total-bar anim">
+      <span class="total-label">💰 總計金額</span>
+      <span class="total-amt">NT$ ${currentTotal.toLocaleString()}</span>
+    </div>
+
+    <div class="step-divider"><div class="line"></div><span>確認商品後進行付款</span><div class="line"></div></div>
+
+    <!-- PAYMENT -->
+    <div class="card anim" id="paySection" style="opacity:.4;pointer-events:none">
+      <div class="section-title">💳 付款方式</div>
+      <div class="pay-methods">
+        <div class="pay-opt" id="opt-transfer" onclick="selectPay('transfer')">
+          <div class="po-icon">🏦</div>
+          <div class="po-name">匯款</div>
+          <div class="po-desc">ATM / 網路銀行</div>
+        </div>
+        <div class="pay-opt" id="opt-deposit" onclick="selectPay('deposit')">
+          <div class="po-icon">🏧</div>
+          <div class="po-name">無摺存款</div>
+          <div class="po-desc">便利商店 / 超商</div>
+        </div>
+      </div>
+
+      <!-- BANK INFO -->
+      <div id="bankInfoBox" class="bank-info" style="display:none">
+        <div class="bank-info-title">📋 匯款資訊</div>
+        ${bankInfo.bank ? `<div class="bank-row"><span class="bank-key">銀行</span><span class="bank-val">${esc(bankInfo.bank)}</span></div>` : ''}
+        ${bankInfo.account ? `<div class="bank-row"><span class="bank-key">帳號</span><div style="display:flex;align-items:center;gap:6px"><span class="bank-val">${esc(bankInfo.account)}</span><button class="copy-btn" onclick="copyText('${esc(bankInfo.account)}')">複製</button></div></div>` : ''}
+        ${bankInfo.name ? `<div class="bank-row"><span class="bank-key">戶名</span><span class="bank-val">${esc(bankInfo.name)}</span></div>` : ''}
+        ${bankInfo.extra ? `<div class="bank-row"><span class="bank-key">備註</span><span class="bank-val" style="font-family:inherit;font-size:13px">${esc(bankInfo.extra)}</span></div>` : ''}
+      </div>
+
+      <!-- PAY FORM -->
+      <div class="pay-form" id="payForm">
+        <div class="field-gap">
+          <label class="field-label">💴 匯款 / 存款金額（NT$）</label>
+          <input type="number" id="payAmount" placeholder="請輸入實際付款金額">
+        </div>
+        <div class="field-gap">
+          <label class="field-label">📸 上傳付款截圖證明</label>
+          <div class="img-upload-area" id="payImgArea" onclick="document.getElementById('payImgFile').click()">
+            <span>📷</span>
+            <span>點擊上傳截圖</span>
+          </div>
+          <input type="file" id="payImgFile" accept="image/*" style="display:none" onchange="pickPayImg(this)">
+          <button class="clear-img-btn" id="clearPayImg" onclick="clearPayImg()">✕ 清除圖片</button>
+        </div>
+        <button class="btn-main" id="submitBtn" onclick="submitPayment()">✅ 送出付款記錄</button>
+      </div>
+    </div>
+
+    <div class="confirm-ok" id="confirmOk">
+      <div class="ok-icon">📬</div>
+      <h3>感謝匯款收物！</h3>
+      <p>金額審核中，請稍後幾天後再次點入網頁輸入名字查看 💌</p>
+    </div>`;
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="not-found"><div class="ico">⚠️</div><h3>網路錯誤</h3><p>請稍後再試</p></div>';
+  }
+}
+
+function toggleCheck(idx) {
+  const chk = document.getElementById(`chk-${idx}`);
+  const card = document.getElementById(`card-${idx}`);
+  checkedItems[idx] = !checkedItems[idx];
+  chk.classList.toggle('on', checkedItems[idx]);
+  card.classList.toggle('checked', checkedItems[idx]);
+  const count = Object.values(checkedItems).filter(Boolean).length;
+  document.getElementById('checkProgress').textContent = `已確認 ${count} / ${totalItems} 件`;
+  const paySection = document.getElementById('paySection');
+  if (count === totalItems) {
+    paySection.style.opacity = '1';
+    paySection.style.pointerEvents = 'auto';
+  } else {
+    paySection.style.opacity = '.4';
+    paySection.style.pointerEvents = 'none';
+  }
+}
+
+let selectedPay = '';
+function selectPay(type) {
+  selectedPay = type;
+  document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('sel'));
+  document.getElementById(`opt-${type}`).classList.add('sel');
+  document.getElementById('bankInfoBox').style.display = 'block';
+  document.getElementById('payForm').classList.add('show');
+}
+
+function pickPayImg(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    payImgB64 = e.target.result;
+    document.getElementById('payImgArea').innerHTML = `<img src="${payImgB64}">`;
+    document.getElementById('clearPayImg').style.display = 'block';
+  };
+  r.readAsDataURL(file);
+}
+function clearPayImg() {
+  payImgB64 = '';
+  document.getElementById('payImgArea').innerHTML = '<span>📷</span><span>點擊上傳截圖</span>';
+  document.getElementById('payImgFile').value = '';
+  document.getElementById('clearPayImg').style.display = 'none';
+}
+
+document.addEventListener('paste', e => {
+  const paySection = document.getElementById('paySection');
+  if (!paySection || paySection.style.pointerEvents === 'none') return;
+  for (const item of e.clipboardData.items) {
+    if (item.type.startsWith('image/')) {
+      const r = new FileReader();
+      r.onload = ev => {
+        payImgB64 = ev.target.result;
+        document.getElementById('payImgArea').innerHTML = `<img src="${payImgB64}">`;
+        document.getElementById('clearPayImg').style.display = 'block';
+      };
+      r.readAsDataURL(item.getAsFile());
+      break;
+    }
+  }
+});
+
+async function submitPayment() {
+  if (!selectedPay) { alert('請選擇付款方式'); return; }
+  const amount = document.getElementById('payAmount').value.trim();
+  if (!amount) { alert('請輸入付款金額'); return; }
+  if (!payImgB64) { alert('請上傳付款截圖'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = '上傳中…'; btn.disabled = true;
+
+  const record = {
+    buyer: currentBuyer,
+    method: selectedPay === 'transfer' ? '匯款' : '無摺存款',
+    amount: Number(amount),
+    totalOrder: currentTotal,
+    img: payImgB64,
+    status: '待處理',
+    timestamp: Date.now()
+  };
+
+  try {
+    await fetch(`${DB_URL}/payments.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    });
+    document.getElementById('paySection').style.display = 'none';
+    document.getElementById('confirmOk').classList.add('show');
+  } catch(e) {
+    alert('送出失敗，請稍後再試');
+    btn.textContent = '✅ 送出付款記錄'; btn.disabled = false;
+  }
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => alert('已複製！'));
+}
+
+function showNotFound(name, el) {
+  el.innerHTML = `<div class="not-found anim"><div class="ico">🔍</div><h3>找不到購買記錄</h3><p>找不到「${esc(name)}」的資料<br>請確認名字是否正確，或聯繫賣家</p></div>`;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>
