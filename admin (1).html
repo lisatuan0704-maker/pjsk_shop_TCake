@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>賣家後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f14;--surface:#17171f;--surface2:#1f1f2a;--border:#2a2a38;
+  --accent:#7c6af7;--pink:#f06292;--green:#4caf82;--red:#e05252;
+  --yellow:#f5a623;--text:#e4e4f0;--dim:#7a7a90;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.lock-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.lock-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 32px;width:320px;text-align:center}
+.lock-box h1{font-size:22px;font-weight:700;margin-bottom:6px}
+.lock-box p{font-size:13px;color:var(--dim);margin-bottom:22px}
+.lock-box input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:16px;color:var(--text);font-family:inherit;outline:none;text-align:center;letter-spacing:4px;margin-bottom:12px}
+.lock-box input:focus{border-color:var(--accent)}
+
+.app{display:none;max-width:720px;margin:0 auto;padding:24px 16px 48px}
+.app-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.app-header h1{font-size:20px;font-weight:700}
+
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface2);border-radius:12px;padding:4px}
+.tab-btn{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;color:var(--dim);border-radius:9px;cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:inherit}
+.tab-btn.on{background:var(--accent);color:#fff}
+
+.tab-content{display:none}
+.tab-content.on{display:block}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;white-space:nowrap}
+.btn:hover{opacity:.85}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:transparent;border:1px solid var(--border);color:var(--red);padding:6px 12px;font-size:12px;border-radius:8px}
+.btn-full{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+
+.field{margin-bottom:12px}
+label{display:block;font-size:11px;color:var(--dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;font-weight:500}
+input,textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+
+.img-pick{width:100%;height:105px;border:1.5px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;color:var(--dim);font-size:13px;gap:5px;transition:border-color .2s}
+.img-pick:hover{border-color:var(--accent)}
+.img-pick img{width:100%;height:100%;object-fit:cover}
+.clear-btn{margin-top:6px;background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--dim);cursor:pointer;font-family:inherit;display:none;width:100%}
+.clear-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 11px;font-size:12px;cursor:pointer;transition:all .15s}
+.chip:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.sec{font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.5px;text-transform:uppercase;margin:22px 0 10px}
+
+/* ENTRY ROW */
+.entry-row{display:flex;align-items:center;gap:11px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.thumb img{width:46px;height:46px;object-fit:cover}
+.einfo{flex:1;min-width:0}
+.ename{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ebuyer{font-size:11px;color:var(--accent);margin-top:2px}
+.eprice{font-size:11px;color:var(--dim);margin-top:1px}
+
+/* SUMMARY */
+.buyer-block{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.bhead{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2)}
+.bname{font-size:15px;font-weight:700}
+.bmeta{font-size:11px;color:var(--dim);margin-top:2px}
+.btotal{font-family:'Space Mono',monospace;font-size:14px;color:var(--green)}
+.brow{display:flex;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
+.brow:last-child{border-bottom:none}
+.bt{width:34px;height:34px;border-radius:6px;overflow:hidden;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.bt img{width:34px;height:34px;object-fit:cover}
+.bn{flex:1;font-size:13px;font-weight:500}
+.bd{font-size:11px;color:var(--dim);margin-top:1px}
+.bp{font-family:'Space Mono',monospace;font-size:12px;flex-shrink:0}
+
+/* PAYMENT CARDS */
+.pay-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.pay-head{padding:14px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pay-buyer{font-size:15px;font-weight:700}
+.pay-meta{font-size:12px;color:var(--dim);margin-top:3px}
+.pay-body{padding:14px 16px}
+.pay-proof{width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:var(--surface2);margin-bottom:12px;cursor:pointer}
+.pay-amount{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;margin-bottom:4px}
+.pay-method-tag{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--dim);margin-bottom:12px}
+
+/* STATUS BADGE */
+.status-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:opacity .15s}
+.status-badge:hover{opacity:.8}
+.s-pending{background:#2a2010;color:var(--yellow);border:1px solid #5a4010}
+.s-confirmed{background:#0d2a1a;color:var(--green);border:1px solid #1a5a30}
+.s-rejected{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}
+
+.status-menu{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:140px}
+.status-opt{padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;transition:background .15s}
+.status-opt:hover{background:var(--surface2)}
+
+.pay-amounts-row{display:flex;gap:10px;margin-bottom:10px}
+.amt-box{flex:1;background:var(--surface2);border-radius:10px;padding:10px 12px;text-align:center}
+.amt-label{font-size:10px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.amt-val{font-family:'Space Mono',monospace;font-size:14px;font-weight:700}
+.amt-val.paid{color:var(--green)}
+.amt-val.unpaid{color:var(--red)}
+.amt-val.order{color:var(--accent)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.img-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:999;cursor:pointer;display:none}
+.img-modal.show{display:flex}
+.img-modal img{max-width:90vw;max-height:90vh;border-radius:12px}
+
+.empty-state{text-align:center;padding:36px 0;color:var(--dim);font-size:14px}
+
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:up .2s ease forwards}
+
+.bank-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+
+<div class="lock-wrap" id="lockWrap">
+  <div class="lock-box">
+    <h1>🔐 賣家後台</h1>
+    <p>輸入密碼登入管理</p>
+    <input type="password" id="pwInput" placeholder="密碼" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="btn btn-primary btn-full" onclick="unlock()">登入</button>
+    <p style="margin-top:10px;font-size:11px;color:var(--dim)">預設密碼：1234</p>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="app-header">
+    <h1>賣家後台</h1>
+    <div id="syncStatus" style="font-size:12px;color:var(--dim)">載入中…</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn on" onclick="switchTab('orders')">📦 商品管理</button>
+    <button class="tab-btn" onclick="switchTab('payments')">💳 付款管理</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ 設定</button>
+  </div>
+
+  <!-- TAB: ORDERS -->
+  <div class="tab-content on" id="tab-orders">
+    <div class="sec">新增購買記錄</div>
+    <div class="card">
+      <div class="field">
+        <label>買家名字</label>
+        <input id="inBuyer" placeholder="輸入名字，或點選下方已有買家" oninput="renderChips()">
+        <div class="chips" id="buyerChips"></div>
+      </div>
+      <div class="field">
+        <label>商品名稱</label>
+        <input id="inName" placeholder="例：金魚杏 閃卡 *10">
+      </div>
+      <div class="field">
+        <label>備註（選填）</label>
+        <input id="inDesc" placeholder="例：絕版、九成新">
+      </div>
+      <div class="field">
+        <label>金額（NT$）</label>
+        <input id="inPrice" type="number" placeholder="例：1200">
+      </div>
+      <div class="field">
+        <label>商品圖片（點擊上傳 或 貼上截圖 Ctrl+V）</label>
+        <div class="img-pick" id="imgPick" onclick="document.getElementById('imgFile').click()">
+          <span>📷</span><span>點擊上傳 或 貼上截圖</span>
+        </div>
+        <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="pickFile(this)">
+        <button class="clear-btn" id="clearImgBtn" onclick="clearImg()">✕ 清除圖片</button>
+      </div>
+      <button class="btn btn-green btn-full" onclick="addEntry()">✅ 新增記錄</button>
+    </div>
+
+    <div class="sec" id="allLabel">所有記錄</div>
+    <div id="entryList"></div>
+
+    <div class="sec">按買家自動整理</div>
+    <div id="summaryList"></div>
+  </div>
+
+  <!-- TAB: PAYMENTS -->
+  <div class="tab-content" id="tab-payments">
+    <div class="sec" id="payLabel">付款記錄</div>
+    <div id="paymentList"></div>
+  </div>
+
+  <!-- TAB: SETTINGS -->
+  <div class="tab-content" id="tab-settings">
+    <div class="sec">匯款資訊（顯示給買家）</div>
+    <div class="card">
+      <div class="bank-grid">
+        <div class="field">
+          <label>銀行名稱</label>
+          <input id="sBank" placeholder="例：玉山銀行">
+        </div>
+        <div class="field">
+          <label>戶名</label>
+          <input id="sName" placeholder="例：王小明">
+        </div>
+      </div>
+      <div class="field">
+        <label>帳號</label>
+        <input id="sAccount" placeholder="例：123456789012">
+      </div>
+      <div class="field">
+        <label>備註（選填）</label>
+        <input id="sExtra" placeholder="例：後5碼 12345">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveBankInfo()">💾 儲存匯款資訊</button>
+    </div>
+
+    <div class="sec">後台密碼</div>
+    <div class="card">
+      <div class="field">
+        <label>新密碼</label>
+        <input type="password" id="newPw" placeholder="輸入新密碼">
+      </div>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:12px">⚠️ 更改後需重新修改 admin.html 檔案中的 PW 變數</p>
+    </div>
+  </div>
+</div>
+
+<!-- IMG MODAL -->
+<div class="img-modal" id="imgModal" onclick="closeModal()">
+  <img id="modalImg" src="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DB_URL = 'https://my-shop-316d7-default-rtdb.asia-southeast1.firebasedatabase.app';
+const PW = '1234';
+
+let entries = [];
+let payments = [];
+let imgB64 = '';
+
+function unlock() {
+  if (document.getElementById('pwInput').value === PW) {
+    document.getElementById('lockWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadAll();
+  } else { alert('密碼錯誤！'); }
+}
+
+async function loadAll() {
+  setStatus('載入中…');
+  try {
+    const [eRes, pRes, bRes] = await Promise.all([
+      fetch(`${DB_URL}/entries.json`),
+      fetch(`${DB_URL}/payments.json`),
+      fetch(`${DB_URL}/bankInfo.json`)
+    ]);
+    const eData = await eRes.json();
+    const pData = await pRes.json();
+    const bData = await bRes.json();
+
+    entries = eData ? Object.entries(eData).map(([id,v])=>({...v,fireId:id})) : [];
+    entries.sort((a,b)=>b.id-a.id);
+
+    payments = pData ? Object.entries(pData).map(([id,v])=>({...v,fireId:id})) : [];
+    payments.sort((a,b)=>b.timestamp-a.timestamp);
+
+    if (bData) {
+      document.getElementById('sBank').value = bData.bank || '';
+      document.getElementById('sAccount').value = bData.account || '';
+      document.getElementById('sName').value = bData.name || '';
+      document.getElementById('sExtra').value = bData.extra || '';
+    }
+
+    setStatus('已同步 ✓');
+    renderAll();
+  } catch(e) { setStatus('載入失敗'); }
+}
+
+function setStatus(msg) { document.getElementById('syncStatus').textContent = msg; }
+
+// TABS
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('on', ['orders','payments','settings'][i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('on'));
+  document.getElementById(`tab-${tab}`).classList.add('on');
+}
+
+// IMG
+function pickFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader(); r.onload = e => setImg(e.target.result); r.readAsDataURL(file);
+}
+function setImg(src) {
+  imgB64 = src;
+  document.getElementById('imgPick').innerHTML = `<img src="${src}" style="pointer-events:none">`;
+  document.getElementById('clearImgBtn').style.display = 'block';
+}
+function clearImg() {
+  imgB64 = '';
+  document.getElementById('imgPick').innerHTML = '<span>📷</span><span>點擊上傳 或 貼上截圖</span>';
+  document.getElementById('imgFile').value = '';
+  document.getElementById('clearImgBtn').style.display = 'none';
+}
+
+document.addEventListener('paste', e => {
+  if (document.getElementById('app').style.display === 'none') return;
+  if (!document.getElementById('tab-orders').classList.contains('on')) return;
+  for (const item of e.clipboardData.items) {
+    if (item.type.startsWith('image/')) {
+      const r = new FileReader(); r.onload = ev => setImg(ev.target.result); r.readAsDataURL(item.getAsFile()); break;
+    }
+  }
+});
+
+// CHIPS
+function renderChips() {
+  const val = document.getElementById('inBuyer').value.toLowerCase();
+  const names = [...new Set(entries.map(e => e.buyer))];
+  const list = val ? names.filter(n => n.toLowerCase().includes(val)) : names;
+  document.getElementById('buyerChips').innerHTML = list.map(n =>
+    `<div class="chip" onclick="document.getElementById('inBuyer').value='${esc(n)}';renderChips()">${esc(n)}</div>`
+  ).join('');
+}
+
+// ADD ENTRY
+async function addEntry() {
+  const buyer = document.getElementById('inBuyer').value.trim();
+  const name  = document.getElementById('inName').value.trim();
+  const desc  = document.getElementById('inDesc').value.trim();
+  const price = document.getElementById('inPrice').value.trim();
+  if (!buyer) { alert('請輸入買家名字'); return; }
+  if (!name)  { alert('請輸入商品名稱'); return; }
+  if (!price) { alert('請輸入金額'); return; }
+  const btn = document.querySelector('.btn-green');
+  btn.textContent = '上傳中…'; btn.disabled = true;
+  const entry = { id: Date.now(), buyer, name, desc, price: Number(price), img: imgB64 };
+  try {
+    const res = await fetch(`${DB_URL}/entries.json`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(entry) });
+    const data = await res.json();
+    entry.fireId = data.name;
+    entries.unshift(entry);
+    document.getElementById('inName').value = '';
+    document.getElementById('inDesc').value = '';
+    document.getElementById('inPrice').value = '';
+    clearImg();
+    showToast('新增成功！');
+    renderAll();
+  } catch(e) { alert('新增失敗'); }
+  btn.textContent = '✅ 新增記錄'; btn.disabled = false;
+}
+
+async function delEntry(fireId) {
+  if (!confirm('確定刪除？')) return;
+  await fetch(`${DB_URL}/entries/${fireId}.json`, { method:'DELETE' });
+  entries = entries.filter(e => e.fireId !== fireId);
+  showToast('已刪除'); renderAll();
+}
+
+// RENDER
+function renderAll() { renderChips(); renderEntries(); renderSummary(); renderPayments(); }
+
+function renderEntries() {
+  document.getElementById('allLabel').textContent = `所有記錄（${entries.length} 筆）`;
+  const el = document.getElementById('entryList');
+  if (!entries.length) { el.innerHTML = '<p style="color:var(--dim);font-size:13px;margin-bottom:8px">還沒有記錄</p>'; return; }
+  el.innerHTML = entries.map(e => `
+    <div class="entry-row anim">
+      <div class="thumb">${e.img ? `<img src="${e.img}">` : '📦'}</div>
+      <div class="einfo">
+        <div class="ename">${esc(e.name)}</div>
+        <div class="ebuyer">👤 ${esc(e.buyer)}</div>
+        <div class="eprice">NT$ ${Number(e.price).toLocaleString()}</div>
+      </div>
+      <button class="btn btn-red" onclick="delEntry('${e.fireId}')">刪除</button>
+    </div>`).join('');
+}
+
+function renderSummary() {
+  const el = document.getElementById('summaryList');
+  const map = {};
+  entries.forEach(e => { if (!map[e.buyer]) map[e.buyer] = []; map[e.buyer].push(e); });
+  const buyers = Object.keys(map);
+  if (!buyers.length) { el.innerHTML = ''; return; }
+  el.innerHTML = buyers.map(buyer => {
+    const items = map[buyer];
+    const total = items.reduce((s,i) => s + Number(i.price), 0);
+    return `<div class="buyer-block">
+      <div class="bhead">
+        <div><div class="bname">${esc(buyer)}</div><div class="bmeta">${items.length} 件商品</div></div>
+        <div class="btotal">NT$ ${total.toLocaleString()}</div>
+      </div>
+      ${items.map(e => `<div class="brow">
+        <div class="bt">${e.img ? `<img src="${e.img}">` : '📦'}</div>
+        <div><div class="bn">${esc(e.name)}</div>${e.desc ? `<div class="bd">${esc(e.desc)}</div>` : ''}</div>
+        <div class="bp">NT$ ${Number(e.price).toLocaleString()}</div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+// PAYMENTS
+function renderPayments() {
+  const el = document.getElementById('paymentList');
+  document.getElementById('payLabel').textContent = `付款記錄（${payments.length} 筆）`;
+  if (!payments.length) { el.innerHTML = '<div class="empty-state">還沒有任何付款記錄</div>'; return; }
+
+  // Summary per buyer
+  const byBuyer = {};
+  payments.forEach(p => {
+    if (!byBuyer[p.buyer]) byBuyer[p.buyer] = { paid: 0, pending: 0, order: 0 };
+    const orderAmt = entries.filter(e => e.buyer === p.buyer).reduce((s,e) => s + Number(e.price), 0);
+    byBuyer[p.buyer].order = orderAmt;
+    if (p.status === '已確認') byBuyer[p.buyer].paid += Number(p.amount);
+    else byBuyer[p.buyer].pending += Number(p.amount);
+  });
+
+  el.innerHTML = payments.map(p => {
+    const b = byBuyer[p.buyer] || {};
+    const unpaid = Math.max(0, (b.order || 0) - (b.paid || 0));
+    const date = new Date(p.timestamp).toLocaleDateString('zh-TW', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const statusClass = p.status === '已確認' ? 's-confirmed' : p.status === '已拒絕' ? 's-rejected' : 's-pending';
+    return `<div class="pay-card anim">
+      <div class="pay-head">
+        <div>
+          <div class="pay-buyer">👤 ${esc(p.buyer)}</div>
+          <div class="pay-meta">${esc(p.method)} · ${date}</div>
+        </div>
+        <div style="position:relative">
+          <button class="status-badge ${statusClass}" onclick="toggleStatusMenu('${p.fireId}',this)">
+            ${p.status === '已確認' ? '✅' : p.status === '已拒絕' ? '❌' : '⏳'} ${esc(p.status)}
+          </button>
+          <div class="status-menu" id="menu-${p.fireId}" style="display:none;right:0;top:36px">
+            <div class="status-opt" onclick="updateStatus('${p.fireId}','待處理')">⏳ 待處理</div>
+            <div class="status-opt" onclick="updateStatus('${p.fireId}','已確認')">✅ 已確認</div>
+            <div class="status-opt" onclick="updateStatus('${p.fireId}','已拒絕')">❌ 已拒絕</div>
+          </div>
+        </div>
+      </div>
+      <div class="pay-body">
+        <div class="pay-amounts-row">
+          <div class="amt-box"><div class="amt-label">訂單金額</div><div class="amt-val order">NT$ ${(b.order||0).toLocaleString()}</div></div>
+          <div class="amt-box"><div class="amt-label">已付金額</div><div class="amt-val paid">NT$ ${(b.paid||0).toLocaleString()}</div></div>
+          <div class="amt-box"><div class="amt-label">待付金額</div><div class="amt-val unpaid">NT$ ${unpaid.toLocaleString()}</div></div>
+        </div>
+        <div class="pay-method-tag">${esc(p.method)}</div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px">本次付款金額</div>
+        <div class="pay-amount">NT$ ${Number(p.amount).toLocaleString()}</div>
+        ${p.img ? `<img class="pay-proof" src="${p.img}" onclick="openModal('${p.fireId}')" title="點擊放大">` : '<p style="font-size:12px;color:var(--dim);margin-top:8px">無付款截圖</p>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Store imgs separately to avoid inline data in onclick
+const payImgMap = {};
+function openModal(fireId) {
+  const p = payments.find(p => p.fireId === fireId);
+  if (!p || !p.img) return;
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('imgModal').classList.add('show');
+}
+function closeModal() { document.getElementById('imgModal').classList.remove('show'); }
+
+function toggleStatusMenu(fireId, btn) {
+  const menu = document.getElementById(`menu-${fireId}`);
+  const isShown = menu.style.display === 'block';
+  document.querySelectorAll('.status-menu').forEach(m => m.style.display = 'none');
+  menu.style.display = isShown ? 'none' : 'block';
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.status-badge') && !e.target.closest('.status-menu')) {
+    document.querySelectorAll('.status-menu').forEach(m => m.style.display = 'none');
+  }
+});
+
+async function updateStatus(fireId, status) {
+  document.querySelectorAll('.status-menu').forEach(m => m.style.display = 'none');
+  await fetch(`${DB_URL}/payments/${fireId}.json`, {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ status })
+  });
+  const p = payments.find(p => p.fireId === fireId);
+  if (p) p.status = status;
+  showToast(`狀態更新為：${status}`);
+  renderPayments();
+}
+
+// BANK INFO
+async function saveBankInfo() {
+  const info = {
+    bank: document.getElementById('sBank').value.trim(),
+    account: document.getElementById('sAccount').value.trim(),
+    name: document.getElementById('sName').value.trim(),
+    extra: document.getElementById('sExtra').value.trim()
+  };
+  await fetch(`${DB_URL}/bankInfo.json`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(info)
+  });
+  showToast('匯款資訊已儲存！');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>
